@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const UserSchema = new Schema(
+const UserSchema = new mongoose.Schema(
     {
         id: {
             type: String,
@@ -22,7 +22,7 @@ const UserSchema = new Schema(
     { _id: false }
 );
 
-const RatingSchema = new Schema(
+const RatingSchema = new mongoose.Schema(
     {
         software: {
             type: Number,
@@ -48,7 +48,7 @@ const RatingSchema = new Schema(
     { _id: false }
 );
 
-const TeamSchema = new Schema(
+const TeamSchema = new mongoose.Schema(
     {
         name: {
             type: String,
@@ -68,4 +68,4 @@ const TeamSchema = new Schema(
     }
 );
 
-export default model('Team', TeamSchema);
+export default mongoose.model('Team', TeamSchema);
