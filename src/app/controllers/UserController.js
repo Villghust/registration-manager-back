@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 
-import Cryptography from '../../lib/Cryptography.js';
+import { hash } from '../../lib/Cryptography.js';
 
 import User from '../schemas/User.js';
 
@@ -28,7 +28,7 @@ class UserController {
             return res.status(400).json({ error: 'User already exists' });
         }
 
-        const password_hash = await Cryptography.hash(password);
+        const password_hash = await hash(password);
 
         const { _id } = await User.create({
             name,

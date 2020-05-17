@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 
 import jwt from 'jsonwebtoken';
 
-import Cryptography from '../../lib/Cryptography.js';
+import { compare } from '../../lib/Cryptography.js';
 
 import User from '../schemas/User.js';
 
@@ -29,10 +29,7 @@ class SessionController {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const isPasswordValid = await Cryptography.compare(
-            password,
-            user.password_hash
-        );
+        const isPasswordValid = await compare(password, user.password_hash);
 
         if (!isPasswordValid) {
             return res.status(401).json({ error: 'Incorrect Password' });
