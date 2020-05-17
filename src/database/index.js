@@ -7,7 +7,7 @@ class Database {
 
     mongo() {
         this.mongoConnection = mongoose.connect(
-            'mongodb://localhost:27017/registration-manager',
+            `mongodb://${process.env.MONGO_IP_ADDRESS}/registration-manager`,
             { useNewUrlParser: true, useFindAndModify: true }
         );
     }
