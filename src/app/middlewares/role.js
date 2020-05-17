@@ -1,5 +1,7 @@
-export default function permit() {
-    return (req, res, next) => {
-        req.reviewer ? next() : res.status(403).json({ message: 'Forbidden' });
-    };
-}
+export default async (req, res, next) => {
+    if (req.reviewer) {
+        return next();
+    }
+
+    return res.status(403).json({ message: 'Forbidden' });
+};

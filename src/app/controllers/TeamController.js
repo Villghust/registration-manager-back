@@ -47,7 +47,7 @@ class TeamController {
         }
 
         for (const user of user_list) {
-            const { reviewer } = await User.findById(user.id);
+            const { reviewer } = await User.find({ email: user.email });
 
             if (reviewer) {
                 return res
@@ -59,7 +59,10 @@ class TeamController {
         const { _id, rating } = await Team.create({ name, user_list });
 
         for (const user of user_list) {
-            await User.findByIdAndUpdate(user.id, { team: req.body.name });
+            await User.findOneAndUpdate(
+                { email: user.email },
+                { team: req.body.name }
+            );
         }
 
         return res.status(201).json({ _id, name, user_list, rating });
@@ -116,7 +119,7 @@ class TeamController {
         }
 
         for (const user of user_list) {
-            const { reviewer } = await User.findById(user.id);
+            const { reviewer } = await User.find({ email: user.email });
 
             if (reviewer) {
                 return res
@@ -135,10 +138,14 @@ class TeamController {
     }
 
     async delete(req, res) {
-        const { user_list } = await Team.findById(req.params.team_id);
+        const team = await Team.findById(req.params.team_id);
 
-        for (const user of user_list) {
-            await User.findByIdAndUpdate(user.id, { team: null });
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        for (const user of team.user_list) {
+            await User.findOneAndUpdate({ email: user.email }, { team: null });
         }
 
         await Team.deleteOne({ _id: req.params.team_id });
