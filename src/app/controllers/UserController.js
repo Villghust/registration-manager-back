@@ -1,4 +1,4 @@
-import * as Yup from 'yup';
+import Yup from 'yup';
 
 import { hash } from '../../lib/Cryptography.js';
 

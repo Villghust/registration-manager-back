@@ -1,4 +1,4 @@
-import * as Yup from 'yup';
+import Yup from 'yup';
 
 import Team from '../schemas/Team.js';
 import User from '../schemas/User.js';
