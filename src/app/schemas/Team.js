@@ -1,19 +1,71 @@
-/*
+import { Schema, model } from 'mongoose';
 
-lista de users
-nome
+const UserSchema = new Schema(
+    {
+        id: {
+            type: String,
+            required: true,
+        },
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+        },
+        course: {
+            type: String,
+            required: true,
+        },
+    },
+    { _id: false }
+);
 
-- Atributos avaliativos (notas)
-    Software
-    processo
-    pitch
-    inovação
-    formaçãoDoTime
+const RatingSchema = new Schema(
+    {
+        software: {
+            type: Number,
+            default: null,
+        },
+        process: {
+            type: Number,
+            default: null,
+        },
+        pitch: {
+            type: Number,
+            default: null,
+        },
+        innovation: {
+            type: Number,
+            default: null,
+        },
+        team_formation: {
+            type: Number,
+            default: null,
+        },
+    },
+    { _id: false }
+);
 
-- Regra de negócio
-    pelo menos dois cursos distintos
+const TeamSchema = new Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        user_list: {
+            type: [UserSchema],
+            required: true,
+        },
+        rating: {
+            type: RatingSchema,
+        },
+    },
+    {
+        timestamps: false,
+    }
+);
 
-
-*/
-
-// TODO
+export default model('Team', TeamSchema);

@@ -45,8 +45,34 @@ class UserController {
     }
 
     async update(req, res) {
-        // TODO
-        return res.status(200).json('ok');
+        const schema = Yup.object().shape({
+            team: Yup.string().required(),
+        });
+
+        if (!(await schema.isValid(req.body))) {
+            return res.status(400).json({ error: 'Validation fails' });
+        }
+
+        const { user_id } = req.params;
+
+        const { name, email, reviewer, course } = await User.findById(user_id);
+
+        if (reviewer) {
+            return res
+                .status(422)
+                .json({ error: 'Reviewers cannot be on teams' });
+        }
+
+        await User.findByIdAndUpdate(user_id, req.body);
+
+        return res.status(200).json({
+            _id: user_id,
+            name,
+            email,
+            reviewer,
+            course,
+            team: req.body.team,
+        });
     }
 }
 

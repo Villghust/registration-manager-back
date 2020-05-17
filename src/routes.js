@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import SessionController from './app/controllers/SessionController';
 import UserController from './app/controllers/UserController';
+import TeamController from './app/controllers/TeamController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -12,7 +13,9 @@ routes.post('/sessions', SessionController.store);
 
 routes.use(authMiddleware);
 
-// TODO
-routes.delete('/sessions/:session_id', SessionController.delete);
+routes.post('/teams', TeamController.store);
+routes.put('/users/:user_id', UserController.update);
+routes.put('/teams/:team_id', TeamController.update);
+routes.delete('/teams/:team_id', TeamController.delete);
 
 export default routes;
