@@ -42,7 +42,7 @@ class SessionController {
 
         return res.status(201).json({
             user: { _id, name, email, reviewer, course, team },
-            token: jwt.sign({ _id }, authConfig.secret, {
+            token: jwt.sign({ _id, reviewer }, authConfig.secret, {
                 expiresIn: authConfig.expiresIn,
             }),
         });
