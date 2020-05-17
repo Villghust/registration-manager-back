@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import routes from './routes';
 
-import './database';
+import routes from './routes.js';
+
+import './database.js';
 
 class App {
     constructor() {

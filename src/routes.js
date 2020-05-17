@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import SessionController from './app/controllers/SessionController';
-import UserController from './app/controllers/UserController';
-import TeamController from './app/controllers/TeamController';
+import SessionController from './app/controllers/SessionController.js';
+import UserController from './app/controllers/UserController.js';
+import TeamController from './app/controllers/TeamController.js';
 
-import authMiddleware from './app/middlewares/auth';
-import roleMiddleware from './app/middlewares/role';
+import authMiddleware from './app/middlewares/auth.js';
+import roleMiddleware from './app/middlewares/role.js';
 
 const routes = new Router();
 

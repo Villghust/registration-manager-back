@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 
-import Team from '../schemas/Team';
-import User from '../schemas/User';
+import Team from '../schemas/Team.js';
+import User from '../schemas/User.js';
 
 class TeamController {
     async store(req, res) {

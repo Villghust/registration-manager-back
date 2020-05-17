@@ -1,8 +1,8 @@
 import * as Yup from 'yup';
 
-import Cryptography from '../../lib/Cryptography';
+import Cryptography from '../../lib/Cryptography.js';
 
-import User from '../schemas/User';
+import User from '../schemas/User.js';
 
 class UserController {
     async store(req, res) {
