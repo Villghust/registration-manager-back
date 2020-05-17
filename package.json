@@ -6,7 +6,8 @@
   "author": "Márcio Santos do Carmo <m.s.carmo@outlook.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/server.js",
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
     "dev:debug": "nodemon --inspect src/server.js",
     "lint": "eslint --fix src --ext .js"
   },
