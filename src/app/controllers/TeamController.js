@@ -68,6 +68,12 @@ class TeamController {
         return res.status(201).json({ _id, name, user_list, rating });
     }
 
+    async list(req, res) {
+        const teams = await Team.find({}).sort({ name: 'asc' }).limit(20);
+
+        return res.status(200).json({ teams });
+    }
+
     async update(req, res) {
         const schema = Yup.object().shape({
             user_list: Yup.array(
