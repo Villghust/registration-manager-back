@@ -16,10 +16,11 @@ routes.use(authMiddleware);
 
 routes.post('/teams', TeamController.store);
 routes.get('/teams', TeamController.list);
+routes.put('/teams/:team_id/user-list', TeamController.patchUserList);
 
 routes.use(roleMiddleware);
 
-routes.put('/teams/:team_id', TeamController.update);
+routes.put('/teams/:team_id/rating', TeamController.patchRating);
 routes.delete('/teams/:team_id', TeamController.delete);
 
 export default routes;

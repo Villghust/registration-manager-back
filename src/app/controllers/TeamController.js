@@ -9,9 +9,7 @@ class TeamController {
             name: Yup.string().required(),
             user_list: Yup.array(
                 Yup.object().shape({
-                    name: Yup.string().required(),
                     email: Yup.string().required(),
-                    course: Yup.string().required(),
                 })
             ).required(),
         });
@@ -21,17 +19,6 @@ class TeamController {
         }
 
         const { name, user_list } = req.body;
-
-        const isValid = user_list.find(
-            (user) => user.course !== user_list[0].course
-        );
-
-        if (!isValid) {
-            return res.status(422).json({
-                error:
-                    'The team must be created with at least two members of different courses',
-            });
-        }
 
         let hasSameUser;
 
@@ -46,26 +33,60 @@ class TeamController {
             });
         }
 
-        for (const user of user_list) {
-            const { reviewer } = await User.find({ email: user.email });
+        let userList = [];
 
-            if (reviewer) {
+        for (const user of user_list) {
+            const u = await User.findOne({ email: user.email });
+
+            if (!u) {
+                return res.status(404).json({
+                    error: `User with email '${user.email}' not found`,
+                });
+            }
+
+            if (u.reviewer) {
                 return res
                     .status(422)
                     .json({ error: 'Reviewers cannot be on teams' });
             }
+
+            const { name, email, course } = u;
+
+            userList.push({ name, email, course });
         }
 
-        const { _id, rating } = await Team.create({ name, user_list });
+        const isValid = userList.find(
+            (user) => user.course !== userList[0].course
+        );
 
-        for (const user of user_list) {
+        if (!isValid) {
+            return res.status(422).json({
+                error:
+                    'The team must be created with at least two members of different courses',
+            });
+        }
+
+        const team = await Team.findOne({ name });
+
+        if (team) {
+            return res.status(422).json({
+                error: 'Team already exists',
+            });
+        }
+
+        const { _id, rating } = await Team.create({
+            name,
+            user_list: userList,
+        });
+
+        for (const user of userList) {
             await User.findOneAndUpdate(
                 { email: user.email },
                 { team: req.body.name }
             );
         }
 
-        return res.status(201).json({ _id, name, user_list, rating });
+        return res.status(201).json({ _id, name, userList, rating });
     }
 
     async list(req, res) {
@@ -74,15 +95,88 @@ class TeamController {
         return res.status(200).json({ teams });
     }
 
-    async update(req, res) {
+    async patchUserList(req, res) {
         const schema = Yup.object().shape({
             user_list: Yup.array(
                 Yup.object().shape({
-                    name: Yup.string().required(),
                     email: Yup.string().required(),
-                    course: Yup.string().required(),
                 })
-            ).nullable(),
+            ).required(),
+        });
+
+        if (!(await schema.isValid(req.body))) {
+            return res.status(400).json({ error: 'Validation fails' });
+        }
+
+        const { team_id } = req.params;
+
+        const team = await Team.findById(team_id);
+
+        if (!team) {
+            return res.status(404).json({
+                error: `Team with id '${team_id}' not found`,
+            });
+        }
+
+        const { user_list } = req.body;
+
+        let hasSameUser;
+
+        for (let i = 1; i < user_list.length; i++) {
+            hasSameUser = user_list[0].email === user_list[i].email;
+        }
+
+        if (hasSameUser) {
+            return res.status(422).json({
+                error:
+                    'You cannot create a team with more than one of the same person',
+            });
+        }
+
+        let userList = [];
+
+        for (const user of user_list) {
+            const u = await User.findOne({ email: user.email });
+
+            if (!u) {
+                return res.status(404).json({
+                    error: `User with email '${user.email}' not found`,
+                });
+            }
+
+            if (u.reviewer) {
+                return res
+                    .status(422)
+                    .json({ error: 'Reviewers cannot be on teams' });
+            }
+
+            const { name, email, course } = u;
+
+            userList.push({ name, email, course });
+        }
+
+        const isValid = userList.find(
+            (user) => user.course !== userList[0].course
+        );
+
+        if (!isValid) {
+            return res.status(422).json({
+                error:
+                    'The team need at least two members of different courses',
+            });
+        }
+
+        await Team.findByIdAndUpdate(team_id, { user_list: userList });
+
+        const { name } = await Team.findById(team_id);
+
+        return res
+            .status(200)
+            .json({ _id: team_id, name, user_list: userList });
+    }
+
+    async patchRating(req, res) {
+        const schema = Yup.object().shape({
             rating: Yup.object()
                 .shape({
                     software: Yup.number().min(0).max(5),
@@ -98,47 +192,19 @@ class TeamController {
             return res.status(400).json({ error: 'Validation fails' });
         }
 
-        const { user_list } = req.body;
-
-        const isValid = user_list.find(
-            (user) => user.course !== user_list[0].course
-        );
-
-        if (!isValid) {
-            return res.status(422).json({
-                error:
-                    'The team need at least two members of different courses',
-            });
-        }
-
-        let hasSameUser;
-
-        for (let i = 1; i < user_list.length; i++) {
-            hasSameUser = user_list[0].email === user_list[i].email;
-        }
-
-        if (hasSameUser) {
-            return res.status(422).json({
-                error:
-                    'You cannot create a team with more than one of the same person',
-            });
-        }
-
-        for (const user of user_list) {
-            const { reviewer } = await User.find({ email: user.email });
-
-            if (reviewer) {
-                return res
-                    .status(422)
-                    .json({ error: 'Reviewers cannot be on teams' });
-            }
-        }
-
         const { team_id } = req.params;
+
+        const team = await Team.findById(team_id);
+
+        if (!team) {
+            return res.status(404).json({
+                error: `Team with id '${team_id}' not found`,
+            });
+        }
 
         await Team.findByIdAndUpdate(team_id, req.body);
 
-        const { name, rating } = await Team.findById(team_id);
+        const { name, rating, user_list } = await Team.findById(team_id);
 
         return res.status(200).json({ _id: team_id, name, user_list, rating });
     }
