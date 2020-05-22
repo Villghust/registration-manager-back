@@ -50,6 +50,12 @@ class TeamController {
                     .json({ error: 'Reviewers cannot be on teams' });
             }
 
+            if (u.team) {
+                return res.status(422).json({
+                    error: 'You cannot choose an user from another team',
+                });
+            }
+
             const { name, email, course } = u;
 
             userList.push({ name, email, course });
