@@ -62,6 +62,10 @@ const TeamSchema = new mongoose.Schema(
         ratings: {
             type: [RatingSchema],
         },
+        final_rating: {
+            type: Number,
+            default: null,
+        },
     },
     {
         timestamps: false,

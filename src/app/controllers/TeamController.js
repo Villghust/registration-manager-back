@@ -5,6 +5,8 @@ import UserType from '../enum/UserTypeEnum.js';
 import Team from '../schemas/Team.js';
 import User from '../schemas/User.js';
 
+import Average from '../services/CreateAverageBetweenRatings.js';
+
 class TeamController {
     async store(req, res) {
         const schema = Yup.object().shape({
@@ -241,7 +243,8 @@ class TeamController {
             team_formation,
         };
 
-        let ratings = [];
+        let ratings = [],
+            final_rating;
 
         if (team.ratings.length > 0) {
             const exist = team.ratings.find(
@@ -261,13 +264,25 @@ class TeamController {
                 ratings.push(newRating);
             }
 
-            await Team.findByIdAndUpdate(team_id, { ratings });
+            if (team.ratings.length >= 3) {
+                final_rating = Average(team.ratings);
+            }
+
+            if (final_rating) {
+                await Team.findByIdAndUpdate(team_id, {
+                    ratings,
+                    final_rating,
+                });
+            } else {
+                await Team.findByIdAndUpdate(team_id, { ratings });
+            }
 
             return res.status(200).json({
                 _id: team_id,
                 name: team.name,
                 user_list: team.user_list,
                 ratings,
+                final_rating,
             });
         }
 

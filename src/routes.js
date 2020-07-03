@@ -15,8 +15,8 @@ routes.post('/sessions', SessionController.store);
 
 routes.use(auth);
 routes.post('/teams', TeamController.store);
-routes.get('/teams', reviewer, TeamController.list);
-routes.put('/teams/:team_id/user-list', admin, TeamController.patchUserList);
+routes.get('/teams', TeamController.list);
+routes.put('/teams/:team_id/user-list', TeamController.patchUserList);
 routes.put('/teams/:team_id/rating', reviewer, TeamController.patchRating);
 routes.delete('/teams/:team_id', admin, TeamController.delete);
 routes.post('/users', admin, UserController.store); // Comentar esta rota quando for criar o admin
