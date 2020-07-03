@@ -15,10 +15,9 @@ const UserSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        reviewer: {
-            type: Boolean,
+        user_type: {
+            type: String,
             required: true,
-            default: false,
         },
         course: {
             type: String,

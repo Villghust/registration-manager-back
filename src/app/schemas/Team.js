@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema(
 
 const RatingSchema = new mongoose.Schema(
     {
+        reviewer_id: {
+            type: String,
+            required: true,
+        },
         software: {
             type: Number,
             default: null,
@@ -55,8 +59,8 @@ const TeamSchema = new mongoose.Schema(
             type: [UserSchema],
             required: true,
         },
-        rating: {
-            type: RatingSchema,
+        ratings: {
+            type: [RatingSchema],
         },
     },
     {

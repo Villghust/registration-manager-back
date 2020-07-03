@@ -1,12 +1,11 @@
+import jwt from 'jsonwebtoken';
 import Yup from 'yup';
 
-import jwt from 'jsonwebtoken';
+import authConfig from '../../config/auth.js';
 
 import { compare } from '../../lib/Cryptography.js';
 
 import User from '../schemas/User.js';
-
-import authConfig from '../../config/auth.js';
 
 class SessionController {
     async store(req, res) {
@@ -35,11 +34,11 @@ class SessionController {
             return res.status(401).json({ error: 'Incorrect Password' });
         }
 
-        const { _id, name, reviewer, course, team } = user;
+        const { id, name, user_type, course, team } = user;
 
         return res.status(201).json({
-            user: { _id, name, email, reviewer, course, team },
-            token: jwt.sign({ _id, reviewer }, authConfig.secret, {
+            user: { id, name, email, user_type, course, team },
+            token: jwt.sign({ id, user_type }, authConfig.secret, {
                 expiresIn: authConfig.expiresIn,
             }),
         });

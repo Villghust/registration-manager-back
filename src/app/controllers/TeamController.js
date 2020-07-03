@@ -1,5 +1,7 @@
 import Yup from 'yup';
 
+import UserType from '../enum/UserTypeEnum.js';
+
 import Team from '../schemas/Team.js';
 import User from '../schemas/User.js';
 
@@ -19,6 +21,14 @@ class TeamController {
         }
 
         const { name, user_list } = req.body;
+
+        const team = await Team.findOne({ name });
+
+        if (team) {
+            return res.status(422).json({
+                error: 'Team already exists',
+            });
+        }
 
         let hasSameUser;
 
@@ -40,19 +50,25 @@ class TeamController {
 
             if (!u) {
                 return res.status(404).json({
-                    error: `User with email '${user.email}' not found`,
+                    error: `Competitor with email '${user.email}' not found`,
                 });
             }
 
-            if (u.reviewer) {
+            if (u.user_type === UserType.REVIEWER) {
                 return res
                     .status(422)
                     .json({ error: 'Reviewers cannot be on teams' });
             }
 
+            if (u.user_type === UserType.ADMIN) {
+                return res
+                    .status(422)
+                    .json({ error: 'Admins cannot be on teams' });
+            }
+
             if (u.team) {
                 return res.status(422).json({
-                    error: 'You cannot choose an user from another team',
+                    error: 'You cannot choose an competitor from another team',
                 });
             }
 
@@ -72,15 +88,7 @@ class TeamController {
             });
         }
 
-        const team = await Team.findOne({ name });
-
-        if (team) {
-            return res.status(422).json({
-                error: 'Team already exists',
-            });
-        }
-
-        const { _id, rating } = await Team.create({
+        const { id, ratings } = await Team.create({
             name,
             user_list: userList,
         });
@@ -92,11 +100,11 @@ class TeamController {
             );
         }
 
-        return res.status(201).json({ _id, name, userList, rating });
+        return res.status(201).json({ id, name, userList, ratings });
     }
 
     async list(req, res) {
-        const teams = await Team.find({}).sort({ name: 'asc' }).limit(20);
+        const teams = await Team.find({}).sort({ name: 'asc' });
 
         return res.status(200).json({ teams });
     }
@@ -150,10 +158,16 @@ class TeamController {
                 });
             }
 
-            if (u.reviewer) {
+            if (u.user_type === UserType.REVIEWER) {
                 return res
                     .status(422)
                     .json({ error: 'Reviewers cannot be on teams' });
+            }
+
+            if (u.user_type === UserType.ADMIN) {
+                return res
+                    .status(422)
+                    .json({ error: 'Admins cannot be on teams' });
             }
 
             const { name, email, course } = u;
@@ -208,11 +222,65 @@ class TeamController {
             });
         }
 
-        await Team.findByIdAndUpdate(team_id, req.body);
+        const reviewer_id = req.userId;
 
-        const { name, rating, user_list } = await Team.findById(team_id);
+        const {
+            software,
+            process,
+            pitch,
+            innovation,
+            team_formation,
+        } = req.body.rating;
 
-        return res.status(200).json({ _id: team_id, name, user_list, rating });
+        const newRating = {
+            reviewer_id,
+            software,
+            process,
+            pitch,
+            innovation,
+            team_formation,
+        };
+
+        let ratings = [];
+
+        if (team.ratings.length > 0) {
+            const exist = team.ratings.find(
+                (r) => r.reviewer_id === reviewer_id
+            );
+
+            if (exist) {
+                ratings = team.ratings.map((r) => {
+                    if (r.reviewer_id === reviewer_id) {
+                        return Object.assign(r, newRating);
+                    }
+
+                    return r;
+                });
+            } else {
+                ratings = team.ratings;
+                ratings.push(newRating);
+            }
+
+            await Team.findByIdAndUpdate(team_id, { ratings });
+
+            return res.status(200).json({
+                _id: team_id,
+                name: team.name,
+                user_list: team.user_list,
+                ratings,
+            });
+        }
+
+        ratings.push(newRating);
+
+        await Team.findByIdAndUpdate(team_id, { ratings });
+
+        return res.status(200).json({
+            _id: team_id,
+            name: team.name,
+            user_list: team.user_list,
+            ratings,
+        });
     }
 
     async delete(req, res) {

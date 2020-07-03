@@ -19,7 +19,7 @@ export default async (req, res, next) => {
         );
 
         req.userId = decoded.id;
-        req.reviewer = decoded.reviewer;
+        req.userType = decoded.user_type;
 
         return next();
     } catch (error) {
